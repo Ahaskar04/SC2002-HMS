@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader; // Added for file reading
+import java.io.FileWriter;
 import java.io.IOException; // Added for file reading
 import java.sql.Time; // Added for handling file reading errors
 import java.text.ParseException;
@@ -42,6 +44,9 @@ public class Application {
                 String id = details[0].trim();
                 String name = details[1].trim();
                 String role = details[2].trim();
+                
+                
+                
 
                 switch (role.toLowerCase()) {
                     case "administrator":
@@ -135,11 +140,32 @@ public class Application {
 
             if (currentUser == null) {
                 System.out.println("Invalid credentials. Please try again.");
+            }else if (currentUser.isFirstLogin()) {
+                System.out.println("This is your first login. Please change your password.");
+                System.out.print("Enter new password: ");
+                String newPassword = scanner.nextLine();
+                currentUser.setPassword(newPassword);
+                currentUser.setFirstLogin(false); // Update firstLogin flag
+
+                updateStaffList(staff, "Staff_Pass.csv");
             }
         }
 
         return currentUser;
     }
+
+    private static void updateStaffList(List<User> staff, String filePath) {
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        writer.write("ID,Name,Role,Gender,Age,Password,FirstLogin\n"); // Write header
+        for (User user : staff) {
+            writer.write(user.hospitalID + "," + user.name + "," + user.getClass().getSimpleName() + ","
+                        + user.password + "," + user.isFirstLogin() + "\n");
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    }   
+
 
     private static void displayRoleMenu(User user, Scanner scanner, AppointmentManager manager, List<User> staff,
             List<Patient> patients, List<ReplenishmentRequest> requests) {

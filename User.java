@@ -2,12 +2,16 @@ public abstract class User {
     protected String hospitalID;
     protected String password;
     protected String name;
+    protected boolean firstLogin;
+  
 
     // Constructor method
     public User(String hospitalID, String password, String name) {
         this.hospitalID = hospitalID;
         this.password = password; // Use the password passed as an argument
         this.name = name;
+        
+        this.firstLogin = true; // Default to true for first login
     }
 
     // Setter for Hospital ID
@@ -25,14 +29,17 @@ public abstract class User {
         return name;
     }
 
+   
+
     // Login Method
     public boolean login(String hospitalID, String password) {
         return this.hospitalID.equals(hospitalID) && this.password.equals(password);
     }
 
     // Change Password Method
-    public void changePassword(String newPassword) {
+    public void setPassword(String newPassword) {
         password = newPassword;
+        System.out.println("Password changed successfully.");
     }
 
     // Getter for Password
@@ -42,4 +49,12 @@ public abstract class User {
 
     // Abstract Method
     public abstract void displayMenu();
+
+    public boolean isFirstLogin() {
+        return firstLogin;
+    }
+
+    public void setFirstLogin(boolean firstLogin) {
+        this.firstLogin = firstLogin;
+    }
 }
