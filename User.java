@@ -8,8 +8,8 @@ public abstract class User {
     // Constructor method
     public User(String hospitalID, String password, String name) {
         this.hospitalID = hospitalID;
-        this.password = password; // Use the password passed as an argument
-        this.name = name;
+        this.password = PasswordUtils.hashPassword(password); // Hashing the password
+        this.name = name;   
         
         this.firstLogin = true; // Default to true for first login
     }

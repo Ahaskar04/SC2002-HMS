@@ -101,7 +101,7 @@ public class Application {
     // Updated Method: Now accepts dynamic lists of users
     private static User authenticateUser(Scanner scanner, List<User> staff, List<Patient> patients) {
         User currentUser = null;
-
+    
         while (currentUser == null) {
             System.out.println("Please select your role to log in:");
             System.out.println("1. Administrator");
@@ -111,60 +111,113 @@ public class Application {
             System.out.print("Enter your choice: ");
             int roleChoice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-
+    
             System.out.print("Enter ID: ");
             String hospitalID = scanner.nextLine();
             System.out.print("Enter Password: ");
             String password = scanner.nextLine();
-
+    
+            String hashedPassword = PasswordUtils.hashPassword(password);
+    
             switch (roleChoice) {
                 case 1:
                 case 2:
                 case 4:
                     currentUser = staff.stream()
                             .filter(user -> user.getHospitalID().equals(hospitalID)
-                                    && user.getPassword().equals(password))
+                                    && user.getPassword().equals(hashedPassword))
                             .findFirst()
                             .orElse(null);
                     break;
                 case 3:
                     currentUser = patients.stream()
                             .filter(patient -> patient.getHospitalID().equals(hospitalID)
-                                    && patient.getPassword().equals(password))
+                                    && patient.getPassword().equals(hashedPassword))
                             .findFirst()
                             .orElse(null);
                     break;
                 default:
                     System.out.println("Invalid choice, please try again.");
             }
-
+    
             if (currentUser == null) {
                 System.out.println("Invalid credentials. Please try again.");
-            }else if (currentUser.isFirstLogin()) {
+            } else if (currentUser.isFirstLogin()) {
                 System.out.println("This is your first login. Please change your password.");
                 System.out.print("Enter new password: ");
                 String newPassword = scanner.nextLine();
-                currentUser.setPassword(newPassword);
-                currentUser.setFirstLogin(false); // Update firstLogin flag
-
+                currentUser.setPassword(PasswordUtils.hashPassword(newPassword));
+                currentUser.setFirstLogin(false);
+    
                 updateStaffList(staff, "Staff_Pass.csv");
+                System.out.println("Password updated successfully. Please login again.");
+                return null;  // Restart login for updated credentials
             }
         }
-
         return currentUser;
-    }
+    }    
 
     private static void updateStaffList(List<User> staff, String filePath) {
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-        writer.write("ID,Name,Role,Gender,Age,Password,FirstLogin\n"); // Write header
-        for (User user : staff) {
-            writer.write(user.hospitalID + "," + user.name + "," + user.getClass().getSimpleName() + ","
-                        + user.password + "," + user.isFirstLogin() + "\n");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write("ID,Name,Role,Password,FirstLogin\n"); // Write header
+            for (User user : staff) {
+                writer.write(user.hospitalID + "," + user.name + "," + user.getClass().getSimpleName() + ","
+                            + PasswordUtils.hashPassword(user.getPassword()) + "," + user.isFirstLogin() + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    } catch (IOException e) {
-        e.printStackTrace();
+    }  
+
+    public static void updatePassword(String hospitalID, String newPassword) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("Staff_Pass.csv"));
+        StringBuilder sb = new StringBuilder();
+        String line;
+    
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.split(",");
+            if (parts[0].equals(hospitalID)) {
+                parts[3] = PasswordUtils.hashPassword(newPassword); // Update password to hashed value
+                parts[4] = "false"; // Set FirstLogin to false
+            }
+            sb.append(String.join(",", parts)).append("\n");
+        }
+        br.close();
+    
+        BufferedWriter bw = new BufferedWriter(new FileWriter("Staff_Pass.csv"));
+        bw.write(sb.toString());
+        bw.close();
     }
-    }   
+    
+    
+    public static boolean login(String hospitalID, String inputPassword) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("Staff_Pass.csv"));
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.split(",");
+            if (parts[0].equals(hospitalID)) {
+                String storedHashedPassword = parts[3]; // Assuming index 3 contains the hashed password
+                boolean firstLogin = Boolean.parseBoolean(parts[4]);
+    
+                if (firstLogin) {
+                    System.out.println("First-time login detected. Please change your password.");
+                    Scanner scanner = new Scanner(System.in);  // Do not close this Scanner
+                    System.out.print("Enter new password: ");
+                    String newPassword = scanner.nextLine();
+                    updatePassword(hospitalID, newPassword);
+                    System.out.println("Password updated successfully. Please login again.");
+                    return false;  // Force user to log in again
+                }
+    
+                return PasswordUtils.hashPassword(inputPassword).equals(storedHashedPassword);
+            }
+        }
+        br.close(); // Close the BufferedReader only
+        return false; // If no match found
+    }
+    
+    
+   
 
 
     private static void displayRoleMenu(User user, Scanner scanner, AppointmentManager manager, List<User> staff,
