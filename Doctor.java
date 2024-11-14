@@ -1,27 +1,20 @@
 import java.sql.Time;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 public class Doctor extends User {
-    private String doctorID;
-    private String name;
-    private String password;
+    // private String doctorID;
+    // private String name;
+    // private String password;
     private List<Appointment> upcomingAppointments;
 
     // Constructor Method
     public Doctor(String doctorID, String name, String password, List<Appointment> upcomingAppointments) {
         super(doctorID, password, name);
+        // this.doctorID = doctorID;
+        // this.name = name;
         this.upcomingAppointments = new ArrayList<>(upcomingAppointments);
-    }
-
-    // Getter Methods
-    public String getDoctorID() {
-        return doctorID;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public List<Appointment> getUpcomingAppointments() {
@@ -47,7 +40,7 @@ public class Doctor extends User {
         }
 
         // Display patient personal information
-        System.out.println("Patient ID: " + patient.getPatientID());
+        System.out.println("Patient ID: " + patient.getHospitalID());
         System.out.println("Name: " + patient.getName());
         System.out.println("Date of Birth: " + patient.getDateOfBirth());
         System.out.println("Gender: " + patient.getGender());
@@ -94,85 +87,51 @@ public class Doctor extends User {
                 + currentDate);
     }
 
-    public void setAvailability(Date date, Time time, boolean isAvailable) {
-        // Check if the appointment slot already exists
+    public void setAvailability(Date date, Time time, boolean isAvailable, AppointmentManager manager) {
         boolean slotExists = false;
-
         for (Appointment appointment : upcomingAppointments) {
             if (appointment.getAppointmentDate().equals(date) && appointment.getAppointmentTime().equals(time)) {
-                // Update the status of the existing slot
                 appointment.updateStatus(isAvailable ? "available" : "unavailable");
                 slotExists = true;
-                System.out.println("Updated availability for slot on " + date + " at " + time + " to "
-                        + (isAvailable ? "available" : "unavailable"));
                 break;
             }
         }
 
-        // If the slot doesn't exist, create a new one
         if (!slotExists && isAvailable) {
             Appointment newAppointment = new Appointment(null, this, date, time, "available");
             upcomingAppointments.add(newAppointment);
-            System.out.println("New available slot added on " + date + " at " + time);
-        } else if (!slotExists && !isAvailable) {
-            System.out.println("Slot on " + date + " at " + time + " is already unavailable.");
+            manager.addAppointment(newAppointment);
         }
     }
 
-    public void acceptAppointment(Appointment appointment) {
-        if (appointment == null) {
-            System.out.println("Invalid appointment. Please provide a valid appointment.");
+    /**
+     * @param manager
+     * @param appointment
+     */
+    public void acceptAppointment(AppointmentManager manager, Appointment appointment) {
+        if (appointment == null || !appointment.getStatus().equalsIgnoreCase("requested")) {
+            System.out.println("Invalid or non-requested appointment.");
             return;
         }
 
-        // Check if the appointment is associated with this doctor
-        if (!upcomingAppointments.contains(appointment)) {
-            System.out.println("Appointment not found in your upcoming appointments.");
-            return;
-        }
-
-        // Check if the appointment can be accepted (assuming "requested" is the initial
-        // status)
-        if (!appointment.getStatus().equalsIgnoreCase("requested")) {
-            System.out.println("This appointment cannot be accepted. Current status: " + appointment.getStatus());
-            return;
-        }
-
-        // Update the appointment status to confirmed
+        // Update the status to confirmed via AppointmentManager
         appointment.updateStatus("confirmed");
-        System.out.println(
-                "Appointment on " + appointment.getAppointmentDate() + " at " + appointment.getAppointmentTime() +
-                        " with Patient: " + appointment.getPatient().getName() + " has been accepted.");
+        System.out.println("Appointment confirmed successfully.");
     }
 
-    public void declineAppointment(Appointment appointment) {
-        if (appointment == null) {
-            System.out.println("Invalid appointment. Please provide a valid appointment.");
+    public void declineAppointment(AppointmentManager manager, Appointment appointment) {
+        if (appointment == null || !appointment.getStatus().equalsIgnoreCase("requested")) {
+            System.out.println("Invalid or non-requested appointment.");
             return;
         }
 
-        // Check if the appointment is associated with this doctor
-        if (!upcomingAppointments.contains(appointment)) {
-            System.out.println("Appointment not found in your upcoming appointments.");
-            return;
-        }
-
-        // Check if the appointment can be declined (assuming "requested" or "pending"
-        // is the initial status)
-        if (!appointment.getStatus().equalsIgnoreCase("requested") &&
-                !appointment.getStatus().equalsIgnoreCase("pending")) {
-            System.out.println("This appointment cannot be declined. Current status: " + appointment.getStatus());
-            return;
-        }
-
-        // Update the appointment status to declined
+        // Update the status to declined via AppointmentManager
         appointment.updateStatus("declined");
-        System.out.println(
-                "Appointment on " + appointment.getAppointmentDate() + " at " + appointment.getAppointmentTime() +
-                        " with Patient: " + appointment.getPatient().getName() + " has been declined.");
+        System.out.println("Appointment declined successfully.");
     }
 
-    public void recordAppointmentOutcome(Appointment appointment, String serviceType, String notes) {
+    public void recordAppointmentOutcome(Appointment appointment, String serviceType, String Medicine, String Status,
+            int Quantity, String notes) {
         if (appointment == null) {
             System.out.println("Invalid appointment. Please provide a valid appointment.");
             return;
@@ -195,6 +154,7 @@ public class Doctor extends User {
         // Update appointment details with the outcome
         appointment.setServiceType(serviceType);
         appointment.setNotes(notes);
+        appointment.setPrescription(Medicine, Status, Quantity);
         appointment.updateStatus("completed"); // Mark the appointment as completed
 
         System.out.println("Appointment outcome recorded successfully for the appointment on " +
@@ -204,7 +164,7 @@ public class Doctor extends User {
 
     @Override
     public String toString() {
-        return "Doctor ID: " + doctorID + ", Name: " + name;
+        return "Doctor ID: " + this.getHospitalID() + ", Name: " + name;
     }
 
     @Override

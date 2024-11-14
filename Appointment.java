@@ -1,5 +1,6 @@
 import java.sql.Time;
 import java.util.Date;
+import java.util.Scanner;
 
 public class Appointment {
     private Patient patient;
@@ -8,6 +9,7 @@ public class Appointment {
     private Time appointmentTime;
     private String status; // e.g., "confirmed", "cancelled", "completed"
     private String serviceType; // e.g., "Consultation", "Follow-up"
+    private Prescription pres;
     private String notes; // Notes for the appointment outcome
 
     // Constructor
@@ -18,9 +20,11 @@ public class Appointment {
         this.appointmentTime = appointmentTime;
         this.status = status;
         this.serviceType = ""; // Default to empty
+        this.pres = new Prescription(); //Default to
         this.notes = ""; // Default to empty
     }
 
+    Scanner sc=new Scanner(System.in);
     // Getters and Setters
     public Patient getPatient() {
         return patient;
@@ -70,6 +74,16 @@ public class Appointment {
         this.serviceType = serviceType;
     }
 
+    public Prescription getPrescription(){
+        return pres;
+    }
+
+    public void setPrescription(String med, String Status, int q){
+        pres.setMedicationName(med);
+        pres.setStatus(Status);
+        pres.setQuantity(q);
+    }
+
     public String getNotes() {
         return notes;
     }
@@ -91,7 +105,8 @@ public class Appointment {
                 ", Status: " + status +
                 ", Service Type: " + serviceType +
                 ", Notes: " + notes +
-                ", Patient: " + patient.getName() +
-                ", Doctor: " + doctor.getName() + "]";
+                ", Prescription: " + pres.toString() +
+                ", Patient: " + (patient != null ? patient.getName() : "N/A") +
+                ", Doctor: " + (doctor != null ? doctor.getName() : "N/A")+ "]";
     }
 }

@@ -1,59 +1,61 @@
 public class Staff {
     private String staffID;
     private String name;
-    private String role; // e.g., Nurse, Pharmacist, Receptionist
-    private String contactInfo;
+    private String role;
+    private String gender;
+    private int age;
 
-    // Constructor
-    public Staff(String staffID, String name, String role, String contactInfo) {
+    public Staff(String staffID, String name, String role, String gender, int age) {
         this.staffID = staffID;
         this.name = name;
         this.role = role;
-        this.contactInfo = contactInfo;
+        this.gender = gender;
+        this.age = age;
     }
 
-    // Getter for Staff ID
     public String getStaffID() {
         return staffID;
     }
 
-    // Setter for Staff ID
-    public void setStaffID(String staffID) {
-        this.staffID = staffID;
-    }
-
-    // Getter for Name
     public String getName() {
         return name;
     }
 
-    // Setter for Name
     public void setName(String name) {
         this.name = name;
     }
 
-    // Getter for Role
     public String getRole() {
         return role;
     }
 
-    // Setter for Role
     public void setRole(String role) {
         this.role = role;
     }
 
-    // Getter for Contact Info
-    public String getContactInfo() {
-        return contactInfo;
+    public String getGender() {
+        return gender;
     }
 
-    // Setter for Contact Info
-    public void setContactInfo(String contactInfo) {
-        this.contactInfo = contactInfo;
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String toCSV() {
+        return String.join(",", staffID, name, role, gender, String.valueOf(age));
     }
 
     @Override
     public String toString() {
-        return "Staff [ID: " + staffID + ", Name: " + name + ", Role: " + role + ", Contact Info: " + contactInfo + "]";
+        return "Staff ID: " + staffID + ", Name: " + name + ", Role: " + role +
+                ", Gender: " + gender + ", Age: " + age;
     }
 }

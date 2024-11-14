@@ -9,7 +9,8 @@ public class Prescription {
         this.status = status;
         this.quantity = quantity;
     }
-
+    public Prescription(){}//default constructor
+    
     // Getter for Medication Name
     public String getMedicationName() {
         return medicationName;
@@ -44,6 +45,16 @@ public class Prescription {
     public void updateStatus(String status) {
         this.status = status;
     }
+
+    /*public Prescription getPrescription(){
+        return this;
+    }
+
+    public void setPrescription(String med, String Status, int q){
+        this.medicationName = med;
+        this.status = status;
+        this.quantity = q;
+    }*/
 
     @Override
     public String toString() {
