@@ -14,7 +14,7 @@ public class Administrator extends User {
         this.medicationInventory = new HashMap<>();
     }
 
-    // Load staff from CSV file
+    //Load staff from CSV file
     public static List<Staff> loadStaffFromCSV(String filePath) {
         List<Staff> staffList = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -30,7 +30,7 @@ public class Administrator extends User {
             e.printStackTrace();
         }
         return staffList;
-    }
+    } 
 
     // get function
 

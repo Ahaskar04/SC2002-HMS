@@ -64,8 +64,11 @@ public class Patient extends User {
     }
 
     public void addAppointmentToHistory(Appointment appointment) {
-        appointmentHistory.add(appointment);
+        if (!appointmentHistory.contains(appointment)) {
+            appointmentHistory.add(appointment);
     }
+}
+
 
     public void viewAvailableAppointments(AppointmentManager manager) {
         List<Appointment> availableAppointments = manager.getAvailableAppointments();
@@ -127,20 +130,22 @@ public class Patient extends User {
         }
     }
 
-    public void aptHistory(Patient patient)
-    {
-               // Display appointment history
-               if (patient.getAppointmentHistory().isEmpty()) {
-                System.out.println("No appointments found.");
-            } else {
-                for (Appointment appointment : patient.getAppointmentHistory()) {
-                    System.out.println("Date: " + appointment.getAppointmentDate() +
-                            ", Time: " + appointment.getAppointmentTime() +
-                            ", Status: " + appointment.getStatus() +
-                            ", Doctor: " + appointment.getDoctor().getName());
-                }
+    public void aptHistory(Patient patient, AppointmentManager manager) {
+        // Display appointment history from AppointmentManager
+        List<Appointment> patientAppointments = manager.getAppointmentsByPatient(patient);
+
+        if (patientAppointments.isEmpty()) {
+            System.out.println("No appointments found.");
+        } else {
+            for (Appointment appointment : patientAppointments) {
+                System.out.println("Date: " + appointment.getAppointmentDate() +
+                        ", Time: " + appointment.getAppointmentTime() +
+                        ", Status: " + appointment.getStatus() +
+                        ", Doctor: " + appointment.getDoctor().getName());
             }
+        }
     }
+
 
     /* 
     this is added to check if the patient object we create elesehwere when finding with patient in csv manager is same or not

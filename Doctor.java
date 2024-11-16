@@ -37,11 +37,11 @@ public class Doctor extends User {
     }
 
     // Method to view Patient Records
-    public void viewPatientRecords(Patient patient) {
+    public void viewPatientRecords(Patient patient, AppointmentManager manager) {
         MedicalRecordManager recordManager = new MedicalRecordManager();
         patient.viewMedicalRecord(recordManager);
         System.out.println("Appointment history:");
-        patient.aptHistory(patient);
+        patient.aptHistory(patient, manager);
     }
 
     // Method to Update Patient Record
@@ -135,6 +135,12 @@ public class Doctor extends User {
         appointment.setNotes(notes);
         appointment.setPrescription(med, stat, q);
         appointment.updateStatus(Appointment.AppointmentStatus.COMPLETED); // Mark the appointment as completed
+
+        // Ensure the appointment is added to the patient's history
+        Patient patient = appointment.getPatient();
+        if (patient != null) {
+            patient.addAppointmentToHistory(appointment);
+        }
 
         System.out.println("Appointment outcome recorded successfully for the appointment on " +
                 appointment.getAppointmentDate() + " at " + appointment.getAppointmentTime() +

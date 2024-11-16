@@ -109,7 +109,7 @@ public class Application {
             case 1: // View Patient Medical Records
                 // Find patient from the list
                 Patient patient1 = CsvManager.find_patient();
-                doctor.viewPatientRecords(patient1);
+                doctor.viewPatientRecords(patient1, manager);
                 break;
 
             case 2: // Update Patient Medical Records

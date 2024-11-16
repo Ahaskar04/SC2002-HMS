@@ -265,6 +265,7 @@ public class AppointmentManager {
         return patientAppointments;
     }
 
+
     //Change appointment decision
     public void ApptDec(Doctor doctor ) {
         Scanner scanner=new Scanner(System.in);

@@ -1,9 +1,11 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter; // Add this
 import java.io.FileReader;
+import java.io.FileWriter; // Add this
 import java.io.IOException;
-import java.util.ArrayList; // Added for file reading
+import java.util.ArrayList; 
 import java.util.List;
-import java.util.Scanner; // Added for file reading
+import java.util.Scanner; 
 
 
 public class CsvManager {
@@ -90,7 +92,21 @@ public class CsvManager {
         return users;
     }
 
-    public  static User find_staff()
+    // Save staff list to CSV file
+    public static void saveStaffToCSV(List<Staff> staffList, String filePath) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+            bw.write("Staff ID,Name,Role,Gender,Age");
+            bw.newLine();
+            for (Staff staff : staffList) {
+                bw.write(staff.toCSV());
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static User find_staff()
     {
         System.out.print("Enter Staff ID: ");
         String id = scanner.nextLine().trim();
