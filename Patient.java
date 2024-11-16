@@ -94,6 +94,22 @@ public class Patient extends User {
                         ", Doctor: " + doctorName);
             }
         }
+        
+    }
+    
+    public void aptHistory(Patient patient)
+    {
+               // Display appointment history
+               if (patient.getAppointmentHistory().isEmpty()) {
+                System.out.println("No appointments found.");
+            } else {
+                for (Appointment appointment : patient.getAppointmentHistory()) {
+                    System.out.println("Date: " + appointment.getAppointmentDate() +
+                            ", Time: " + appointment.getAppointmentTime() +
+                            ", Status: " + appointment.getStatus() +
+                            ", Doctor: " + appointment.getDoctor().getName());
+                }
+            }
     }
 
     /*

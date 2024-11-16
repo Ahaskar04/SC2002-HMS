@@ -1,4 +1,6 @@
 import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -262,4 +264,79 @@ public class AppointmentManager {
         }
         return patientAppointments;
     }
+
+    public static void ApptDec(AppointmentManager manager,Doctor doctor )
+    {
+        Scanner scanner=new Scanner(System.in);
+        List<Appointment> pendingAppointments = manager.getPendingAppointments();
+        List<Appointment> doctorPending = pendingAppointments.stream()
+                .filter(app -> app.getDoctor().equals(doctor))
+                .toList();
+
+        if (doctorPending.isEmpty()) {
+            System.out.println("No pending appointment requests.");
+        } else {
+            for (int i = 0; i < doctorPending.size(); i++) {
+                System.out.println((i + 1) + ". " + doctorPending.get(i));
+            }
+            System.out.print("Select an appointment to process (1-" + doctorPending.size() + "): ");
+            int selection = scanner.nextInt();
+            scanner.nextLine();
+
+            if (selection >= 1 && selection <= doctorPending.size()) {
+                Appointment selectedAppointment = doctorPending.get(selection - 1);
+                System.out.print("Accept or Decline (accept/decline): ");
+                String decision = scanner.nextLine();
+                if (decision.equalsIgnoreCase("accept")) {
+                    selectedAppointment.setStatus("accepted");
+
+                } else if (decision.equalsIgnoreCase("decline")) {
+                    selectedAppointment.setStatus("declined");
+                } else {
+                    System.out.println("Invalid input.");
+                }
+            } else {
+                System.out.println("Invalid selection.");
+            }
+        }
+    } 
+
+    public void setAvailability(Doctor doctor, AppointmentManager manager) {
+    Scanner scanner = new Scanner(System.in);
+
+    System.out.println("Set availability as True(1) or False(0): ");
+    int availabilityInput = scanner.nextInt();
+    scanner.nextLine(); // Consume the leftover newline
+    boolean isAvailable = availabilityInput == 1;
+
+    try {
+        System.out.print("Enter available date (dd/MM/yyyy): ");
+        Date date = new SimpleDateFormat("dd/MM/yyyy").parse(scanner.nextLine());
+
+        System.out.print("Enter available time (HH:mm): ");
+        Time time = Time.valueOf(scanner.nextLine() + ":00");
+
+        boolean slotExists = false;
+        for (Appointment appointment : doctor.getUpcomingAppointments()) {
+            if (appointment.getAppointmentDate().equals(date) &&
+                appointment.getAppointmentTime().equals(time)) {
+                appointment.updateStatus(isAvailable ? "available" : "unavailable");
+                slotExists = true;
+                break;
+            }
+        }
+
+        if (!slotExists && isAvailable) {
+            Appointment newAppointment = new Appointment(null, doctor, date, time, "available");
+            doctor.getUpcomingAppointments().add(newAppointment);
+            manager.addAppointment(newAppointment);
+            System.out.println("New appointment slot added.");
+        } else if (!isAvailable) {
+            System.out.println("Availability removed for the selected slot.");
+        }
+    } catch (ParseException | IllegalArgumentException e) {
+        System.out.println("Invalid date or time format. Please try again.");
+    }
+}
+
 }

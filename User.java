@@ -1,8 +1,13 @@
+
+
 public abstract class User {
     protected String hospitalID;
     protected String password;
     protected String name;
     protected boolean firstLogin;
+    private String gender;
+    private String role;
+
   
 
     // Constructor method

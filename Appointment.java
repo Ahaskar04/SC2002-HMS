@@ -109,4 +109,26 @@ public class Appointment {
                 ", Patient: " + (patient != null ? patient.getName() : "N/A") +
                 ", Doctor: " + (doctor != null ? doctor.getName() : "N/A")+ "]";
     }
+
+    // public void acceptAppointment(AppointmentManager manager, Appointment appointment) {
+    //     if (appointment == null || !appointment.getStatus().equalsIgnoreCase("requested")) {
+    //         System.out.println("Invalid or non-requested appointment.");
+    //         return;
+    //     }
+
+    //     // Update the status to confirmed via AppointmentManager
+    //     appointment.updateStatus("confirmed");
+    //     System.out.println("Appointment confirmed successfully.");
+    // }
+
+    // public void declineAppointment(AppointmentManager manager, Appointment appointment) {
+    //     if (appointment == null || !appointment.getStatus().equalsIgnoreCase("requested")) {
+    //         System.out.println("Invalid or non-requested appointment.");
+    //         return;
+    //     }
+
+    //     // Update the status to declined via AppointmentManager
+    //     appointment.updateStatus("declined");
+    //     System.out.println("Appointment declined successfully.");
+    // }
 }
