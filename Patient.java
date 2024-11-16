@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Objects;
 
 public class Patient extends User {
     private String dateOfBirth;
@@ -139,6 +140,25 @@ public class Patient extends User {
                             ", Doctor: " + appointment.getDoctor().getName());
                 }
             }
+    }
+
+    /* 
+    this is added to check if the patient object we create elesehwere when finding with patient in csv manager is same or not
+
+    To fix this issue, you should override the equals (and hashCode) method in the Patient class so that two Patient objects are considered equal if their hospitalID matches.
+    */
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Patient patient = (Patient) obj;
+        return hospitalID.equals(patient.hospitalID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(hospitalID);
     }
 
     // Abstract User Method

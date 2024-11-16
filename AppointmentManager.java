@@ -258,7 +258,7 @@ public class AppointmentManager {
     public List<Appointment> getAppointmentsByPatient(Patient patient) {
         List<Appointment> patientAppointments = new ArrayList<>();
         for (Appointment appointment : appointments) {
-            if (appointment.getPatient().equals(patient)) {
+            if (appointment.getPatient() != null && appointment.getPatient().equals(patient)) {
                 patientAppointments.add(appointment);
             }
         }

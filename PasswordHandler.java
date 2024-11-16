@@ -14,62 +14,81 @@ public class PasswordHandler implements PasswordService {
      // Updated Method: Now accepts dynamic lists of users
     public User authenticateUser(Scanner scanner, List<User> staff, List<Patient> patients) {
         User currentUser = null;
-    
+
         while (currentUser == null) {
-            System.out.println("Please select your role to log in:");
-            System.out.println("1. Administrator");
-            System.out.println("2. Doctor");
-            System.out.println("3. Patient");
-            System.out.println("4. Pharmacist");
-            System.out.print("Enter your choice: ");
-            int roleChoice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-    
-            System.out.print("Enter ID: ");
-            String hospitalID = scanner.nextLine();
-            System.out.print("Enter Password: ");
-            String password = scanner.nextLine();
-            
-            PasswordUtils utils = new PasswordUtils();
-            String hashedPassword = utils.hashPassword(password);
-            switch (roleChoice) {
-                case 1:
-                case 2:
-                case 4:
-                    currentUser = staff.stream()
-                            .filter(user -> user.getHospitalID().equals(hospitalID)
-                                    && user.getPassword().equals(hashedPassword))
-                            .findFirst()
-                            .orElse(null);
-                    break;
-                case 3:
-                    currentUser = patients.stream()
-                            .filter(patient -> patient.getHospitalID().equals(hospitalID)
-                                    && patient.getPassword().equals(hashedPassword))
-                            .findFirst()
-                            .orElse(null);
-                    break;
-                default:
-                    System.out.println("Invalid choice, please try again.");
-            }
-    
-            if (currentUser == null) {
-                System.out.println("Invalid credentials. Please try again.");
-            } else if (currentUser.isFirstLogin()) {
-                System.out.println("This is your first login. Please change your password.");
-                System.out.print("Enter new password: ");
-                String newPassword = scanner.nextLine();
-                currentUser.setPassword(utils.hashPassword(newPassword));
-                currentUser.setFirstLogin(false);
-    
-                updateStaffList(staff, "Staff_Pass.csv", utils);
-                System.out.println("Password updated successfully. Please login again.");
-                return null;  // Restart login for updated credentials
+            try {
+                System.out.println("Please select your role to log in:");
+                System.out.println("1. Administrator");
+                System.out.println("2. Doctor");
+                System.out.println("3. Patient");
+                System.out.println("4. Pharmacist");
+                System.out.println("5. Exit");
+                System.out.print("Enter your choice: ");
+                
+                if (!scanner.hasNextInt()) {  // Check if input is not an integer
+                    System.out.println("Invalid input. Please enter a number between 1 and 5.");
+                    scanner.nextLine();  // Clear the invalid input
+                    continue;
+                }
+
+                int roleChoice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+
+                if (roleChoice == 5) {
+                    System.out.println("Exiting the system. Goodbye!");
+                    System.exit(0); // Exit the application
+                }
+
+                System.out.print("Enter ID: ");
+                String hospitalID = scanner.nextLine();
+                System.out.print("Enter Password: ");
+                String password = scanner.nextLine();
+
+                PasswordUtils utils = new PasswordUtils();
+                String hashedPassword = utils.hashPassword(password);
+
+                switch (roleChoice) {
+                    case 1:
+                    case 2:
+                    case 4:
+                        currentUser = staff.stream()
+                                .filter(user -> user.getHospitalID().equals(hospitalID)
+                                        && user.getPassword().equals(hashedPassword))
+                                .findFirst()
+                                .orElse(null);
+                        break;
+                    case 3:
+                        currentUser = patients.stream()
+                                .filter(patient -> patient.getHospitalID().equals(hospitalID)
+                                        && patient.getPassword().equals(hashedPassword))
+                                .findFirst()
+                                .orElse(null);
+                        break;
+                    default:
+                        System.out.println("Invalid choice, please try again.");
+                }
+
+                if (currentUser == null) {
+                    System.out.println("Invalid credentials. Please try again.");
+                } else if (currentUser.isFirstLogin()) {
+                    System.out.println("This is your first login. Please change your password.");
+                    System.out.print("Enter new password: ");
+                    String newPassword = scanner.nextLine();
+                    currentUser.setPassword(utils.hashPassword(newPassword));
+                    currentUser.setFirstLogin(false);
+
+                    updateStaffList(staff, "Staff_Pass.csv", utils);
+                    System.out.println("Password updated successfully. Please login again.");
+                    return null;  // Restart login for updated credentials
+                }
+            } catch (Exception e) {
+                System.out.println("An error occurred. Please try again.");
+                scanner.nextLine();  // Clear buffer in case of invalid input
             }
         }
         return currentUser;
-    }    
-
+    }
+    
     protected void updateStaffList(List<User> staff, String filePath, PasswordUtils utils) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("ID,Name,Role,Password,FirstLogin\n"); // Write header

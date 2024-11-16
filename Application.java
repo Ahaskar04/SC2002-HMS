@@ -138,7 +138,7 @@ public class Application {
                 manager.ApptDec(doctor);
 
             case 6: // View Upcoming Appointments
-                appointments = doctor.getUpcomingAppointments();
+                appointments = doctor.getConfirmedAppointments();
                 if (appointments.isEmpty()) {
                     System.out.println("No upcoming appointments.");
                 } else {

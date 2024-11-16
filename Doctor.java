@@ -3,16 +3,11 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Doctor extends User {
-    // private String doctorID;
-    // private String name;
-    // private String password;
     private List<Appointment> upcomingAppointments;
 
     // Constructor Method
     public Doctor(String doctorID, String name, String password, List<Appointment> upcomingAppointments) {
         super(doctorID, password, name);
-        // this.doctorID = doctorID;
-        // this.name = name;
         this.upcomingAppointments = new ArrayList<>(upcomingAppointments);
     }
 
@@ -25,6 +20,16 @@ public class Doctor extends User {
         List<Appointment> availableAppointments = new ArrayList<>();
         for (Appointment appointment : upcomingAppointments) {
             if (appointment.getStatus() == Appointment.AppointmentStatus.AVAILABLE) {
+                availableAppointments.add(appointment);
+            }
+        }
+        return availableAppointments;
+    }
+
+    public List<Appointment> getConfirmedAppointments() {
+        List<Appointment> availableAppointments = new ArrayList<>();
+        for (Appointment appointment : upcomingAppointments) {
+            if (appointment.getStatus() == Appointment.AppointmentStatus.CONFIRMED) {
                 availableAppointments.add(appointment);
             }
         }
@@ -55,23 +60,6 @@ public class Doctor extends User {
         System.out.println("Added new record: Diagnosis - " + diagnosis + ", Treatment - " + treatment + ", Date - "
                 + currentDate);
     }
-
-    /*public void setAvailability(Date date, Time time, boolean isAvailable, AppointmentManager manager) {
-        boolean slotExists = false;
-        for (Appointment appointment : upcomingAppointments) {
-            if (appointment.getAppointmentDate().equals(date) && appointment.getAppointmentTime().equals(time)) {
-                appointment.updateStatus(isAvailable ? Appointment.AppointmentStatus.AVAILABLE : Appointment.AppointmentStatus.UNAVAILABLE);
-                slotExists = true;
-                break;
-            }
-        }
-
-        if (!slotExists && isAvailable) {
-            Appointment newAppointment = new Appointment(null, this, date, time, Appointment.AppointmentStatus.AVAILABLE);
-            upcomingAppointments.add(newAppointment);
-            manager.addAppointment(newAppointment);
-        }
-    } */
 
     /**
      * @param manager
@@ -127,8 +115,20 @@ public class Doctor extends User {
          System.out.println("Enter medicine name");
          String med = scanner.next();
          Prescription.PrescriptionStatus stat = Prescription.PrescriptionStatus.PENDING;
-         System.out.println("enter quantity of medicine");
-         int q = scanner.nextInt();
+         
+        int q = 0;
+        boolean validInput = false;
+        while (!validInput) {
+            System.out.println("Enter quantity of medicine");
+            if (scanner.hasNextInt()) {
+                q = scanner.nextInt();
+                validInput = true;
+            } else {
+                System.out.println("Invalid input. Please enter a valid integer for quantity.");
+                scanner.next(); // Clear the invalid input
+            }
+        }
+        scanner.nextLine(); // Consume newline left after nextInt
 
         // Update appointment details with the outcome
         appointment.setServiceType(serviceType);
