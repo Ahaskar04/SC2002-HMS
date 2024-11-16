@@ -1,227 +1,35 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader; // Added for file reading
-import java.io.FileWriter;
-import java.io.IOException; // Added for file reading
-import java.sql.Time; // Added for handling file reading errors
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Scanner; // Added for file reading
 
 public class Application {
+
     public static void main(String[] args) {
         // Changes: Initialize users from CSV files
-        List<User> staff = loadStaffData("Staff_List.csv"); // Load staff from CSV
-        List<Patient> patients = loadPatientData("patient_list.csv"); // Load patients from CSV
+        List<User> staff = CsvManager.loadStaffData("Staff_List.csv"); // Load staff from CSV
+        List<Patient> patients = CsvManager.loadPatientData("patient_list.csv"); // Load patients from CSV
 
         AppointmentManager manager = new AppointmentManager(); // Initialize AppointmentManager
+        PasswordHandler passwordHandler = new PasswordHandler();
         List<ReplenishmentRequest> requests = new ArrayList<>(); // Initialize Replenishment Requests
+        MedicalRecordManager recordManager = new MedicalRecordManager();
 
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Welcome to the Hospital Management System!");
 
         while (true) { // Keep running the application to allow multiple users to log in and out
-            User currentUser = authenticateUser(scanner, staff, patients);
+            User currentUser = passwordHandler.authenticateUser(new Scanner(System.in), staff, patients);
 
             if (currentUser != null) {
                 System.out.println("\nLogin successful! Welcome, " + currentUser.name + ".");
-                displayRoleMenu(currentUser, scanner, manager, staff, patients, requests);
+                displayRoleMenu(currentUser, scanner, manager, staff, patients, requests, recordManager);
             }
         }
     }
-
-    // New Method: Load staff from CSV
-    public static List<User> loadStaffData(String filePath) {
-        List<User> users = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line = br.readLine(); // Skip the header
-            while ((line = br.readLine()) != null) {
-                String[] details = line.split(",");
-                String id = details[0].trim();
-                String name = details[1].trim();
-                String role = details[2].trim();
-                
-                
-                
-
-                switch (role.toLowerCase()) {
-                    case "administrator":
-                        users.add(new Administrator(id, "password", name));
-                        break;
-                    case "doctor":
-                        // users.add(new Doctor(id, name, "docPass", new ArrayList<>()));
-                        Doctor doctor = new Doctor(id, name, "password", new ArrayList<>());
-                        users.add(doctor);
-                        break;
-                    case "pharmacist":
-                        users.add(new Pharmacist(id, "password", name));
-                        break;
-                    default:
-                        System.out.println("Unknown role: " + role);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return users;
-    }
-
-    // New Method: Load patients from CSV
-    public static List<Patient> loadPatientData(String filePath) {
-        List<Patient> patients = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line = br.readLine(); // Skip the header
-            while ((line = br.readLine()) != null) {
-                String[] details = line.split(",");
-                if (details.length < 6) {
-                    System.out.println("Invalid data row, skipping: " + line);
-                    continue;
-                }
-
-                String id = details[0].trim();
-                String name = details[1].trim();
-                String dob = details[2].trim();
-                String gender = details[3].trim();
-                String bloodType = details[4].trim();
-                String contactInfo = details[5].trim();
-
-                patients.add(new Patient(id, dob, gender, contactInfo, bloodType, name, "password", new ArrayList<>(),
-                        new ArrayList<>()));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return patients;
-    }
-
-    // Updated Method: Now accepts dynamic lists of users
-    private static User authenticateUser(Scanner scanner, List<User> staff, List<Patient> patients) {
-        User currentUser = null;
-    
-        while (currentUser == null) {
-            System.out.println("Please select your role to log in:");
-            System.out.println("1. Administrator");
-            System.out.println("2. Doctor");
-            System.out.println("3. Patient");
-            System.out.println("4. Pharmacist");
-            System.out.print("Enter your choice: ");
-            int roleChoice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-    
-            System.out.print("Enter ID: ");
-            String hospitalID = scanner.nextLine();
-            System.out.print("Enter Password: ");
-            String password = scanner.nextLine();
-    
-            String hashedPassword = PasswordUtils.hashPassword(password);
-    
-            switch (roleChoice) {
-                case 1:
-                case 2:
-                case 4:
-                    currentUser = staff.stream()
-                            .filter(user -> user.getHospitalID().equals(hospitalID)
-                                    && user.getPassword().equals(hashedPassword))
-                            .findFirst()
-                            .orElse(null);
-                    break;
-                case 3:
-                    currentUser = patients.stream()
-                            .filter(patient -> patient.getHospitalID().equals(hospitalID)
-                                    && patient.getPassword().equals(hashedPassword))
-                            .findFirst()
-                            .orElse(null);
-                    break;
-                default:
-                    System.out.println("Invalid choice, please try again.");
-            }
-    
-            if (currentUser == null) {
-                System.out.println("Invalid credentials. Please try again.");
-            } else if (currentUser.isFirstLogin()) {
-                System.out.println("This is your first login. Please change your password.");
-                System.out.print("Enter new password: ");
-                String newPassword = scanner.nextLine();
-                currentUser.setPassword(PasswordUtils.hashPassword(newPassword));
-                currentUser.setFirstLogin(false);
-    
-                updateStaffList(staff, "Staff_Pass.csv");
-                System.out.println("Password updated successfully. Please login again.");
-                return null;  // Restart login for updated credentials
-            }
-        }
-        return currentUser;
-    }    
-
-    private static void updateStaffList(List<User> staff, String filePath) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write("ID,Name,Role,Password,FirstLogin\n"); // Write header
-            for (User user : staff) {
-                writer.write(user.hospitalID + "," + user.name + "," + user.getClass().getSimpleName() + ","
-                            + PasswordUtils.hashPassword(user.getPassword()) + "," + user.isFirstLogin() + "\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }  
-
-    public static void updatePassword(String hospitalID, String newPassword) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader("Staff_Pass.csv"));
-        StringBuilder sb = new StringBuilder();
-        String line;
-    
-        while ((line = br.readLine()) != null) {
-            String[] parts = line.split(",");
-            if (parts[0].equals(hospitalID)) {
-                parts[3] = PasswordUtils.hashPassword(newPassword); // Update password to hashed value
-                parts[4] = "false"; // Set FirstLogin to false
-            }
-            sb.append(String.join(",", parts)).append("\n");
-        }
-        br.close();
-    
-        BufferedWriter bw = new BufferedWriter(new FileWriter("Staff_Pass.csv"));
-        bw.write(sb.toString());
-        bw.close();
-    }
-    
-    
-    public static boolean login(String hospitalID, String inputPassword) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader("Staff_Pass.csv"));
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] parts = line.split(",");
-            if (parts[0].equals(hospitalID)) {
-                String storedHashedPassword = parts[3]; // Assuming index 3 contains the hashed password
-                boolean firstLogin = Boolean.parseBoolean(parts[4]);
-    
-                if (firstLogin) {
-                    System.out.println("First-time login detected. Please change your password.");
-                    Scanner scanner = new Scanner(System.in);  // Do not close this Scanner
-                    System.out.print("Enter new password: ");
-                    String newPassword = scanner.nextLine();
-                    updatePassword(hospitalID, newPassword);
-                    System.out.println("Password updated successfully. Please login again.");
-                    return false;  // Force user to log in again
-                }
-    
-                return PasswordUtils.hashPassword(inputPassword).equals(storedHashedPassword);
-            }
-        }
-        br.close(); // Close the BufferedReader only
-        return false; // If no match found
-    }
-    
-    
-   
-
 
     private static void displayRoleMenu(User user, Scanner scanner, AppointmentManager manager, List<User> staff,
-            List<Patient> patients, List<ReplenishmentRequest> requests) {
+            List<Patient> patients, List<ReplenishmentRequest> requests, MedicalRecordManager recordManager) {
         boolean logout = false; // Track if the user chooses to logout
         while (!logout) {
             user.displayMenu();
@@ -234,23 +42,15 @@ public class Application {
                 handleAdminMenu(patients, admin, choice, scanner, manager, requests);
             } else if (user instanceof Doctor) {
                 Doctor docUser = (Doctor) user;
-                logout = handleDoctorMenu(docUser, choice, scanner, manager, patients); // Capture logout status
+                logout = handleDoctorMenu(docUser, choice, scanner, manager, patients, recordManager); // Capture logout status
             } else if (user instanceof Patient) {
                 Patient patUser = (Patient) user;
-                logout = handlePatientMenu(patUser, choice, null, scanner, manager); // Capture logout status
+                logout = handlePatientMenu(patUser, choice, null, scanner, manager, recordManager); // Capture logout status
             } else if (user instanceof Pharmacist) {
                 Pharmacist pharmacist = (Pharmacist) user;
                 handlePharmacistMenu(pharmacist, choice, scanner, patients, manager, requests);
             } else {
                 System.out.println("Invalid role.");
-            }
-
-            if (!logout) { // If user hasn't logged out, ask if they want to continue
-                System.out.println("\nDo you want to continue? (yes/no): ");
-                String response = scanner.nextLine();
-                if (response.equalsIgnoreCase("no")) {
-                    logout = true;
-                }
             }
         }
 
@@ -265,19 +65,11 @@ public class Application {
                 break;
 
             case 2: // View Appointments
-                System.out.print("Enter Patient ID to view completed appointments: ");
-                String patientId = scanner.nextLine();
-
                 // Find patient by ID
-                Patient selectedPatient = patients.stream()
-                        .filter(p -> p.getHospitalID().equals(patientId))
-                        .findFirst()
-                        .orElse(null);
+                Patient selectedPatient =CsvManager.find_patient();
 
-                if (selectedPatient == null) {
-                    System.out.println("Invalid Patient ID. Please try again.");
-                } else {
-                    System.out.println("Completed Appointments for Patient ID: " + patientId);
+                if (selectedPatient != null) {
+                    System.out.println("Completed Appointments for Patient ID: " + selectedPatient.hospitalID);
                     List<Appointment> completedAppointments = manager.getCompletedAppointments(selectedPatient);
 
                     if (completedAppointments.isEmpty()) {
@@ -288,6 +80,7 @@ public class Application {
                         }
                     }
                 }
+
                 break;
 
             case 3:// manage inventory
@@ -311,36 +104,18 @@ public class Application {
     }
 
     private static boolean handleDoctorMenu(Doctor doctor, int choice, Scanner scanner, AppointmentManager manager,
-            List<Patient> patients) {
+            List<Patient> patients, MedicalRecordManager recordManager) {
         switch (choice) {
             case 1: // View Patient Medical Records
-                System.out.print("Enter Patient ID to view records: ");
-                String patientID1 = scanner.nextLine();
-
                 // Find patient from the list
-                Patient patient1 = patients.stream()
-                        .filter(p -> p.getHospitalID().equals(patientID1))
-                        .findFirst()
-                        .orElse(null);
-
+                Patient patient1 = CsvManager.find_patient();
                 doctor.viewPatientRecords(patient1);
                 break;
 
             case 2: // Update Patient Medical Records
-                System.out.print("Enter Patient ID to view records: ");
-                String patientID2 = scanner.nextLine();
-
                 // Find patient from the list
-                Patient patient2 = patients.stream()
-                        .filter(p -> p.getHospitalID().equals(patientID2))
-                        .findFirst()
-                        .orElse(null);
-
-                System.out.println("Enter Diagnosis");
-                String diagnosis = scanner.nextLine();
-                System.out.println("Enter Treatment");
-                String treatment = scanner.nextLine();
-                doctor.updatePatientRecord(patient2, diagnosis, treatment);
+                Patient patient2 = CsvManager.find_patient();
+                doctor.updatePatientRecord(patient2, recordManager);
 
                 break;
 
@@ -356,56 +131,11 @@ public class Application {
                 break;
 
             case 4: // Set Availability for Appointments
-                System.out.println("Set availability as True(1) or False(0): ");
-                int availabilityInput = scanner.nextInt();
-                scanner.nextLine(); // Consume the leftover newline
-                boolean availability = availabilityInput == 1;
-
-                try {
-                    System.out.print("Enter available date (dd/MM/yyyy): ");
-                    Date date = new SimpleDateFormat("dd/MM/yyyy").parse(scanner.nextLine());
-                    System.out.print("Enter available time (HH:mm): ");
-                    Time time = Time.valueOf(scanner.nextLine() + ":00");
-
-                    doctor.setAvailability(date, time, availability, manager);
-                } catch (ParseException | IllegalArgumentException e) {
-                    System.out.println("Invalid date or time format. Please try again.");
-                }
+                manager.setAvailability(doctor,manager);
                 break;
 
             case 5: // Accept or Decline Appointment Requests
-                List<Appointment> pendingAppointments = manager.getPendingAppointments();
-                List<Appointment> doctorPending = pendingAppointments.stream()
-                        .filter(app -> app.getDoctor().equals(doctor))
-                        .toList();
-
-                if (doctorPending.isEmpty()) {
-                    System.out.println("No pending appointment requests.");
-                } else {
-                    for (int i = 0; i < doctorPending.size(); i++) {
-                        System.out.println((i + 1) + ". " + doctorPending.get(i));
-                    }
-                    System.out.print("Select an appointment to process (1-" + doctorPending.size() + "): ");
-                    int selection = scanner.nextInt();
-                    scanner.nextLine();
-
-                    if (selection >= 1 && selection <= doctorPending.size()) {
-                        Appointment selectedAppointment = doctorPending.get(selection - 1);
-                        System.out.print("Accept or Decline (accept/decline): ");
-                        String decision = scanner.nextLine();
-                        if (decision.equalsIgnoreCase("accept")) {
-                            doctor.acceptAppointment(manager, selectedAppointment);
-
-                        } else if (decision.equalsIgnoreCase("decline")) {
-                            doctor.declineAppointment(manager, selectedAppointment);
-                        } else {
-                            System.out.println("Invalid input.");
-                        }
-                    } else {
-                        System.out.println("Invalid selection.");
-                    }
-                }
-                break;
+                manager.ApptDec(doctor);
 
             case 6: // View Upcoming Appointments
                 appointments = doctor.getUpcomingAppointments();
@@ -419,24 +149,14 @@ public class Application {
                 break;
 
             case 7: // Record Appointment Outcome
-                System.out.println("Enter Patient ID for the appointment:");
-                String patientID3 = scanner.nextLine();
-
                 // Find patient from the list
-                Patient patient3 = patients.stream()
-                        .filter(p -> p.getHospitalID().equals(patientID3))
-                        .findFirst()
-                        .orElse(null);
-
+                Patient patient3 = CsvManager.find_patient();
                 if (patient3 == null) {
                     System.out.println("Invalid Patient ID.");
                     break;
                 }
 
-                // Display confirmed appointments for the selected patient
-                List<Appointment> confirmedAppointments = patient3.getAppointmentHistory().stream()
-                        .filter(app -> app.getStatus().equalsIgnoreCase("confirmed"))
-                        .toList();
+                List<Appointment> confirmedAppointments = manager.getConfirmedAppointments(patient3);
 
                 if (confirmedAppointments.isEmpty()) {
                     System.out.println("No confirmed appointments found for this patient.");
@@ -460,21 +180,8 @@ public class Application {
 
                 Appointment selectedAppointment = confirmedAppointments.get(appointmentChoice - 1);
 
-                // Prompt for service type and notes
-                System.out.print("Enter the service type: ");
-                String serviceType = scanner.nextLine();
-
-                System.out.print("Enter any additional notes: ");
-                String notes = scanner.nextLine();
-
-                System.out.println("Enter medicine name");
-                String med = scanner.next();
-                String stat = "pending";
-                System.out.println("enter quantity of medicine");
-                int q = scanner.nextInt();
-
                 // Record the outcome using Doctor's method
-                doctor.recordAppointmentOutcome(selectedAppointment, serviceType, med, stat, q, notes);
+                doctor.recordAppointmentOutcome(selectedAppointment);
                 break;
 
             case 8: // Logout
@@ -487,10 +194,10 @@ public class Application {
     }
 
     private static boolean handlePatientMenu(Patient patient, int choice, Doctor doctor, Scanner scanner,
-            AppointmentManager manager) {
+            AppointmentManager manager, MedicalRecordManager recordManager) {
         switch (choice) {
             case 1: // View Medical Record
-                patient.viewMedicalRecord();
+                patient.viewMedicalRecord(recordManager);
                 break;
 
             case 2: // Update Contact Information
@@ -557,14 +264,11 @@ public class Application {
 
     private static void handlePharmacistMenu(Pharmacist pharmacist, int choice, Scanner scanner,
             List<Patient> patients, AppointmentManager manager, List<ReplenishmentRequest> requests) {
-        System.out.println("Enter Patient ID to view appointment outcomes:");
-        String patientId = scanner.nextLine();
-
+        // System.out.println("Enter Patient ID to view appointment outcomes:");
+        // String patientId = scanner.nextLine();
+                
         // Find patient from the list
-        Patient selectedPatient = patients.stream()
-                .filter(p -> p.getHospitalID().equals(patientId))
-                .findFirst()
-                .orElse(null);
+        Patient selectedPatient = CsvManager.find_patient();
 
         if (selectedPatient == null) {
             System.out.println("Invalid Patient ID. Please try again.");

@@ -53,21 +53,8 @@ public class Patient extends User {
     }
 
     // To view Medical Records
-    public void viewMedicalRecord() {
-        System.out.println("Patient ID: " + hospitalID);
-        System.out.println("Name: " + name);
-        System.out.println("Date of Birth: " + dateOfBirth);
-        System.out.println("Gender: " + gender);
-        System.out.println("Contact Information: " + contactInfo);
-        System.out.println("Blood Type: " + bloodType);
-        System.out.println("\nMedical History:");
-        if (medicalRecords.isEmpty()) {
-            System.out.println("No past medical records found.");
-        } else {
-            for (MedicalRecord record : medicalRecords) {
-                System.out.println(record); // Calls the toString() method of MedicalRecord
-            }
-        }
+    public void viewMedicalRecord(MedicalRecordManager manager) {
+        manager.viewMedicalRecord(this);
     }
 
     // Update Contact Information
@@ -96,124 +83,13 @@ public class Patient extends User {
         }
     }
 
-    /*
-     * public void scheduleAppointment(Scanner scanner, AppointmentManager manager)
-     * {
-     * List<Appointment> availableAppointments = manager.getAvailableAppointments();
-     * 
-     * if (availableAppointments.isEmpty()) {
-     * System.out.println("No available appointments to schedule.");
-     * return;
-     * }
-     * 
-     * System.out.println("Available Appointment Slots:");
-     * for (int i = 0; i < availableAppointments.size(); i++) {
-     * Appointment appointment = availableAppointments.get(i);
-     * String doctorName = (appointment.getDoctor() != null) ?
-     * appointment.getDoctor().getName() : "Unknown";
-     * System.out.println((i + 1) + ". Date: " + appointment.getAppointmentDate() +
-     * ", Time: " + appointment.getAppointmentTime() +
-     * ", Doctor: " + doctorName);
-     * }
-     * 
-     * System.out.
-     * print("Enter the number of the appointment slot you'd like to book (1-" +
-     * availableAppointments.size() + "): ");
-     * 
-     * int choice = scanner.nextInt();
-     * scanner.nextLine(); // Consume newline
-     * 
-     * if (choice < 1 || choice > availableAppointments.size()) {
-     * System.out.println("Invalid selection. Please try again.");
-     * return;
-     * }
-     * 
-     * Appointment selectedAppointment = availableAppointments.get(choice - 1);
-     * selectedAppointment.setPatient(this); // Link the patient to the appointment
-     * selectedAppointment.updateStatus("requested"); // Mark as requested
-     * 
-     * // Add the appointment to the patient's history
-     * appointmentHistory.add(selectedAppointment);
-     * 
-     * System.out.println("Appointment requested successfully: " +
-     * selectedAppointment);
-     * }
-     */
-
-    /*
-     * public void rescheduleAppointment(Appointment appointment, Date newDate, Time
-     * newTime) {
-     * // Get the doctor associated with the current appointment
-     * Doctor doctor = appointment.getDoctor();
-     * 
-     * // Check if the new date and time are available for the same doctor
-     * List<Appointment> doctorAppointments = doctor.getAvailableAppointments();
-     * boolean isRescheduled = false;
-     * 
-     * for (Appointment availableAppointment : doctorAppointments) {
-     * if (availableAppointment.getAppointmentDate().equals(newDate) &&
-     * availableAppointment.getAppointmentTime().equals(newTime) &&
-     * availableAppointment.getStatus().equalsIgnoreCase("available")) {
-     * 
-     * // Cancel the current appointment by updating its status
-     * appointment.updateStatus("available");
-     * 
-     * // Update the new appointment status to confirmed
-     * availableAppointment.updateStatus("requested");
-     * 
-     * // Add the new appointment to the appointment history
-     * appointmentHistory.add(availableAppointment);
-     * 
-     * System.out.println(
-     * "Appointment rescheduled to " + newDate + " at " + newTime + " with Dr. " +
-     * doctor.getName());
-     * isRescheduled = true;
-     * break;
-     * }
-     * }
-     * 
-     * if (!isRescheduled) {
-     * System.out.println("The selected slot on " + newDate + " at " + newTime
-     * + " is unavailable. Please choose a different time.");
-     * }
-     * }
-     */
-
-    /*
-     * public void cancelAppointment(Appointment appointment) {
-     * if (appointment == null) {
-     * System.out.
-     * println("Invalid appointment. Please provide a valid appointment to cancel."
-     * );
-     * return;
-     * }
-     * 
-     * // Check if the appointment exists in the patient's history
-     * if (!appointmentHistory.contains(appointment)) {
-     * System.out.println("Appointment not found in your history.");
-     * return;
-     * }
-     * 
-     * // Update the appointment status to cancelled
-     * appointment.updateStatus("cancelled");
-     * 
-     * // Remove the appointment from the history
-     * appointmentHistory.remove(appointment);
-     * 
-     * System.out.println(
-     * "Appointment on " + appointment.getAppointmentDate() + " at " +
-     * appointment.getAppointmentTime() +
-     * " with Dr. " + appointment.getDoctor().getName() + " has been cancelled.");
-     * }
-     */
-
     public void viewScheduledAppointments() {
         System.out.println("Scheduled Appointments:");
 
         boolean hasScheduledAppointments = false;
 
         for (Appointment appointment : appointmentHistory) {
-            if (appointment.getStatus().equalsIgnoreCase("confirmed")) {
+            if (appointment.getStatus() == Appointment.AppointmentStatus.CONFIRMED) {
                 System.out.println("Date: " + appointment.getAppointmentDate() +
                         ", Time: " + appointment.getAppointmentTime() +
                         ", Doctor: " + appointment.getDoctor().getName());
@@ -248,6 +124,21 @@ public class Patient extends User {
                 }
             }
         }
+    }
+
+    public void aptHistory(Patient patient)
+    {
+               // Display appointment history
+               if (patient.getAppointmentHistory().isEmpty()) {
+                System.out.println("No appointments found.");
+            } else {
+                for (Appointment appointment : patient.getAppointmentHistory()) {
+                    System.out.println("Date: " + appointment.getAppointmentDate() +
+                            ", Time: " + appointment.getAppointmentTime() +
+                            ", Status: " + appointment.getStatus() +
+                            ", Doctor: " + appointment.getDoctor().getName());
+                }
+            }
     }
 
     // Abstract User Method

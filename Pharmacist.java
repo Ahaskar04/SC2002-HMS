@@ -1,3 +1,4 @@
+//import Prescription.PrescriptionStatus;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,21 +90,33 @@ public class Pharmacist extends User {
             return;
         }
 
-        // Update the prescription status
-        System.out.print("Enter new status (e.g., dispensed, pending): ");
-        String status = scanner.nextLine();
+        //updating prescription status
+        System.out.print("Enter new status (0: Dispensed, 1: Not Dispensed): ");
+        int choice = scanner.nextInt();
+        Prescription.PrescriptionStatus status;
 
-        if (prescription.getStatus() == "dispensed") {
+        if (choice == 0) {
+            status = Prescription.PrescriptionStatus.DISPENSED;
+        } else if (choice == 1) {
+            status = Prescription.PrescriptionStatus.PENDING;
+        } else {
+            System.out.println("Invalid choice");
+            return; // Exit method if the choice is invalid
+        }
+
+        // Update inventory only if status is DISPENSED
+        if (prescription.getStatus() == Prescription.PrescriptionStatus.DISPENSED) {
             MedInvent.updateInventory(prescription.getMedicationName(), prescription.getQuantity());
         }
 
         updatePrescriptionStatus(prescription, status);
         System.out.println("Prescription updated successfully:");
         System.out.println(prescription);
+
     }
 
     // Existing updatePrescriptionStatus method
-    public void updatePrescriptionStatus(Prescription prescription, String status) {
+    public void updatePrescriptionStatus(Prescription prescription, Prescription.PrescriptionStatus status) {
         if (prescription == null) {
             System.out.println("Invalid prescription. Please provide a valid prescription.");
             return;

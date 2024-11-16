@@ -1,7 +1,7 @@
 public class ReplenishmentRequest {
     private String medicationName;
     private int quantity;
-    private String requester; // Pharmacist ID or Name
+    private String requester;// Pharmacist ID or Name
     private String status; // "Pending", "Approved", "Rejected"
 
     public ReplenishmentRequest(String medicationName, int quantity, String requester) {

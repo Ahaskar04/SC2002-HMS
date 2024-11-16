@@ -8,9 +8,9 @@ public abstract class User {
     // Constructor method
     public User(String hospitalID, String password, String name) {
         this.hospitalID = hospitalID;
-        this.password = PasswordUtils.hashPassword(password); // Hashing the password
+        PasswordUtils passwordUtils = new PasswordUtils();
+        this.password = passwordUtils.hashPassword(password);
         this.name = name;   
-        
         this.firstLogin = true; // Default to true for first login
     }
 
@@ -28,8 +28,6 @@ public abstract class User {
     public String getName(){
         return name;
     }
-
-   
 
     // Login Method
     public boolean login(String hospitalID, String password) {

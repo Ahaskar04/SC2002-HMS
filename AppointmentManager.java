@@ -1,4 +1,6 @@
 import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,7 +14,7 @@ public class AppointmentManager {
         this.appointments = new ArrayList<>();
     }
 
-   public void addAppointment(Appointment appointment) {
+    public void addAppointment(Appointment appointment) {
         if (appointment.getDoctor() == null) {
             System.out.println("Error: Appointment is missing a doctor reference.");
         } else {
@@ -56,12 +58,12 @@ public class AppointmentManager {
     public List<Appointment> getAvailableAppointments() {
         List<Appointment> availableAppointments = new ArrayList<>();
         for (Appointment appointment : appointments) {
-            if (appointment.getStatus().equalsIgnoreCase("available")) {
+            if (appointment.getStatus() == Appointment.AppointmentStatus.AVAILABLE) {
                 availableAppointments.add(appointment);
             }
         }
         return availableAppointments;
-    } 
+    }
 
     public boolean scheduleAppointment(Patient patient, Scanner scanner) {
         List<Appointment> availableAppointments = getAvailableAppointments();
@@ -91,7 +93,7 @@ public class AppointmentManager {
 
         Appointment selectedAppointment = availableAppointments.get(choice - 1);
         selectedAppointment.setPatient(patient);  // Link the patient to the appointment
-        selectedAppointment.updateStatus("requested");  // Mark as requested
+        selectedAppointment.updateStatus(Appointment.AppointmentStatus.REQUESTED);  // Mark as requested
 
         // Add the appointment to the patient's history
         patient.addAppointmentToHistory(selectedAppointment);
@@ -151,17 +153,17 @@ public class AppointmentManager {
         Appointment newAppointment = availableSlots.get(newChoice - 1);
 
         // Perform the rescheduling
-        if (!newAppointment.getStatus().equalsIgnoreCase("available")) {
+        if (!(newAppointment.getStatus() == Appointment.AppointmentStatus.AVAILABLE)) {
             System.out.println("Selected slot is not available.");
             return false;
         }
 
         // Update the old appointment
-        oldAppointment.updateStatus("available");
+        oldAppointment.updateStatus(Appointment.AppointmentStatus.AVAILABLE);
         oldAppointment.setPatient(null);
 
         // Assign the new appointment
-        newAppointment.updateStatus("requested");
+        newAppointment.updateStatus(Appointment.AppointmentStatus.REQUESTED);
         newAppointment.setPatient(patient);
         patient.addAppointmentToHistory(newAppointment);
 
@@ -196,7 +198,7 @@ public class AppointmentManager {
         Appointment appointmentToCancel = patientAppointments.get(choice - 1);
 
         // Update the appointment status
-        appointmentToCancel.updateStatus("available");
+        appointmentToCancel.updateStatus(Appointment.AppointmentStatus.AVAILABLE);
         appointmentToCancel.setPatient(null); // Unlink the patient
 
         // Remove from patient's history
@@ -210,7 +212,7 @@ public class AppointmentManager {
         List<Appointment> confirmedAppointments = new ArrayList<>();
         
         for (Appointment appointment : getAppointmentsByPatient(patient)) {
-            if (appointment.getStatus().equalsIgnoreCase("confirmed")) {
+            if (appointment.getStatus() == Appointment.AppointmentStatus.CONFIRMED) {
                 confirmedAppointments.add(appointment);
             }
         }
@@ -222,7 +224,7 @@ public class AppointmentManager {
         List<Appointment> completedAppointments = new ArrayList<>();
         
         for (Appointment appointment : getAppointmentsByPatient(patient)) {
-            if (appointment.getStatus().equalsIgnoreCase("completed")) {
+            if (appointment.getStatus() == Appointment.AppointmentStatus.COMPLETED) {
                 completedAppointments.add(appointment);
             }
         }
@@ -234,7 +236,7 @@ public class AppointmentManager {
     public List<Appointment> getPendingAppointments() {
         List<Appointment> pendingAppointments = new ArrayList<>();
         for (Appointment appointment : appointments) {
-            if (appointment.getStatus().equalsIgnoreCase("requested")) {
+            if (appointment.getStatus() == Appointment.AppointmentStatus.REQUESTED) {
                 pendingAppointments.add(appointment);
             }
         }
@@ -261,5 +263,80 @@ public class AppointmentManager {
             }
         }
         return patientAppointments;
+    }
+
+    //Change appointment decision
+    public void ApptDec(Doctor doctor ) {
+        Scanner scanner=new Scanner(System.in);
+        List<Appointment> pendingAppointments = getPendingAppointments();
+        List<Appointment> doctorPending = pendingAppointments.stream()
+                .filter(app -> app.getDoctor().equals(doctor))
+                .toList();
+
+        if (doctorPending.isEmpty()) {
+            System.out.println("No pending appointment requests.");
+        } else {
+            for (int i = 0; i < doctorPending.size(); i++) {
+                System.out.println((i + 1) + ". " + doctorPending.get(i));
+            }
+            System.out.print("Select an appointment to process (1-" + doctorPending.size() + "): ");
+            int selection = scanner.nextInt();
+            scanner.nextLine();
+
+            if (selection >= 1 && selection <= doctorPending.size()) {
+                Appointment selectedAppointment = doctorPending.get(selection - 1);
+                System.out.print("Accept or Decline (accept/decline): ");
+                String decision = scanner.nextLine();
+                if (decision.equalsIgnoreCase("accept")) {
+                    selectedAppointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
+
+                } else if (decision.equalsIgnoreCase("decline")) {
+                    selectedAppointment.setStatus(Appointment.AppointmentStatus.DECLINED);
+                } else {
+                    System.out.println("Invalid input.");
+                }
+            } else {
+                System.out.println("Invalid selection.");
+            }
+        }
+    }
+
+    public void setAvailability(Doctor doctor, AppointmentManager manager) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Set availability as True(1) or False(0): ");
+        int availabilityInput = scanner.nextInt();
+        scanner.nextLine(); // Consume the leftover newline
+        boolean isAvailable = availabilityInput == 1;
+
+        try {
+            System.out.print("Enter available date (dd/MM/yyyy): ");
+            Date date = new SimpleDateFormat("dd/MM/yyyy").parse(scanner.nextLine());
+
+            System.out.print("Enter available time (HH:mm): ");
+            Time time = Time.valueOf(scanner.nextLine() + ":00");
+
+            boolean slotExists = false;
+            for (Appointment appointment : doctor.getUpcomingAppointments()) {
+                if (appointment.getAppointmentDate().equals(date) &&
+                    appointment.getAppointmentTime().equals(time)) {
+                    appointment.updateStatus(isAvailable ? Appointment.AppointmentStatus.AVAILABLE : Appointment.AppointmentStatus.UNAVAILABLE);
+                    slotExists = true;
+                    break;
+                }
+            }
+
+            if (!slotExists && isAvailable) {
+                Appointment newAppointment = new Appointment(null, doctor, date, time, Appointment.AppointmentStatus.AVAILABLE);
+                doctor.getUpcomingAppointments().add(newAppointment);
+                manager.addAppointment(newAppointment);
+                System.out.println("New appointment slot added.");
+            } 
+            else if (!isAvailable) {
+                System.out.println("Availability removed for the selected slot.");
+            }
+        } catch (ParseException | IllegalArgumentException e) {
+            System.out.println("Invalid date or time format. Please try again.");
+        }
     }
 }

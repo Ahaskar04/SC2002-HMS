@@ -3,17 +3,26 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class Appointment {
+    public enum AppointmentStatus{
+        AVAILABLE,
+        UNAVAILABLE,
+        REQUESTED,
+        CONFIRMED,
+        DECLINED,
+        COMPLETED;
+    }
+
     private Patient patient;
     private Doctor doctor;
     private Date appointmentDate;
     private Time appointmentTime;
-    private String status; // e.g., "confirmed", "cancelled", "completed"
+    private AppointmentStatus status; // e.g., "confirmed", "cancelled", "completed"
     private String serviceType; // e.g., "Consultation", "Follow-up"
     private Prescription pres;
     private String notes; // Notes for the appointment outcome
 
     // Constructor
-    public Appointment(Patient patient, Doctor doctor, Date appointmentDate, Time appointmentTime, String status) {
+    public Appointment(Patient patient, Doctor doctor, Date appointmentDate, Time appointmentTime, AppointmentStatus status) {
         this.patient = patient;
         this.doctor = doctor;
         this.appointmentDate = appointmentDate;
@@ -24,7 +33,7 @@ public class Appointment {
         this.notes = ""; // Default to empty
     }
 
-    Scanner sc=new Scanner(System.in);
+    Scanner sc = new Scanner(System.in);
     // Getters and Setters
     public Patient getPatient() {
         return patient;
@@ -58,11 +67,11 @@ public class Appointment {
         this.appointmentTime = appointmentTime;
     }
 
-    public String getStatus() {
+    public AppointmentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
 
@@ -78,7 +87,7 @@ public class Appointment {
         return pres;
     }
 
-    public void setPrescription(String med, String Status, int q){
+    public void setPrescription(String med, Prescription.PrescriptionStatus Status, int q){
         pres.setMedicationName(med);
         pres.setStatus(Status);
         pres.setQuantity(q);
@@ -93,7 +102,7 @@ public class Appointment {
     }
 
     // Method to update the status
-    public void updateStatus(String newStatus) {
+    public void updateStatus(AppointmentStatus newStatus) {
         this.status = newStatus;
         System.out.println("Appointment status updated to: " + newStatus);
     }

@@ -1,10 +1,15 @@
 public class Prescription {
+    public enum PrescriptionStatus {
+        PENDING, // Status before the prescription is filled
+        DISPENSED; // Status after the prescription is filled
+    }
+
     private String medicationName;
-    private String status; // e.g., "pending", "dispensed"
+    private PrescriptionStatus status; // e.g., "pending", "dispensed"
     private int quantity;
 
     // Constructor
-    public Prescription(String medicationName, String status, int quantity) {
+    public Prescription(String medicationName, PrescriptionStatus status, int quantity) {
         this.medicationName = medicationName;
         this.status = status;
         this.quantity = quantity;
@@ -22,12 +27,12 @@ public class Prescription {
     }
 
     // Getter for Status
-    public String getStatus() {
+    public PrescriptionStatus getStatus() {
         return status;
     }
 
     // Setter for Status
-    public void setStatus(String status) {
+    public void setStatus(PrescriptionStatus status) {
         this.status = status;
     }
 
@@ -42,7 +47,7 @@ public class Prescription {
     }
 
     // Method to update the status
-    public void updateStatus(String status) {
+    public void updateStatus(PrescriptionStatus status) {
         this.status = status;
     }
 
