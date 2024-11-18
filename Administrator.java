@@ -200,7 +200,7 @@ public class Administrator extends User {
                         System.out.println("Choose Gender to Filter:");
                         System.out.println("1. Male");
                         System.out.println("2. Female");
-                        System.out.println("3. Hijra Behenchod");
+                        //System.out.println("3. Hijra Behenchod");
                         System.out.print("Enter your choice: ");
                         int genderChoice = scanner.nextInt();
                         scanner.nextLine(); // Consume newline
@@ -212,9 +212,6 @@ public class Administrator extends User {
                                 break;
                             case 2:
                                 genderFilter = "Female";
-                                break;
-                            case 3:
-                                genderFilter = "Hijra";
                                 break;
                             default:
                                 System.out.println("Invalid gender choice.");
@@ -239,8 +236,9 @@ public class Administrator extends User {
                     filteredStaff.forEach(System.out::println);
                 }
 
-            default:
-                System.out.println("Invalid choice.");
+                break;
+                default:
+                    System.out.println("Invalid choice.");
         }
 
         // Save updated staff list to CSV

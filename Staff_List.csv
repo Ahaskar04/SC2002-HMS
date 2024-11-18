@@ -1,16 +1,20 @@
 ID,Name,Role,Password,FirstLogin
-A101,William Green,Administrator,ABCD,false
+A001,Sarah Lee,Administrator,password,true
+A101,William Green,Administrator,password,true
 A111,Tracy Lewis,Administrator,password,true
 A120,Daniel Cruz,Administrator,password,true
 A113,Terry Conner,Administrator,password,true
 A115,Jacob Smith,Administrator,password,true
 A116,Timothy Williams,Administrator,password,true
+D001,John Smith,Doctor,password,true
+D002,Emily Clarke,Doctor,password,true
 D107,Brandon Marshall,Doctor,password,true
 D112,Tiffany Watkins DDS,Doctor,password,true
 D118,Helen Hubbard,Doctor,password,true
 D119,Catherine Holland,Doctor,password,true
 D109,Todd Travis,Doctor,password,true
 D117,John Tran,Doctor,password,true
+P001,Mark Lee,Pharmacist,password,true
 P102,Maureen Robles,Pharmacist,password,true
 P104,Theresa Wilson,Pharmacist,password,true
 P114,Elizabeth Holmes,Pharmacist,password,true

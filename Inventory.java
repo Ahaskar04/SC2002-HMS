@@ -1,4 +1,4 @@
-/*import java.util.HashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Inventory {
@@ -41,4 +41,4 @@ public class Inventory {
     public String toString() {
         return "Inventory: " + medicationStock.toString();
     }
-}*/
+}

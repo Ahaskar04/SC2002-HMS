@@ -25,7 +25,14 @@ public class MedicalRecordManager {
     // Method to add a medical record to a patient's history
     public void addMedicalRecord(Patient patient, String diagnosis, String treatment, String date) {
         MedicalRecord record = new MedicalRecord(diagnosis, treatment, date);
-        patient.getMedicalRecords().add(record);
+        
+        List<MedicalRecord> updatedRecords = patient.getMedicalRecords();
+        updatedRecords.add(record);
+        
+        // Explicitly set the updated list back to the patient
+        patient.setMedicalRecords(updatedRecords);
+
         System.out.println("Medical record added successfully.");
     }
+
 }

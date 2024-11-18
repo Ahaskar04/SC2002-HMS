@@ -1,8 +1,6 @@
 //import Prescription.PrescriptionStatus;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 public class Pharmacist extends User {
@@ -104,12 +102,17 @@ public class Pharmacist extends User {
             return; // Exit method if the choice is invalid
         }
 
-        // Update inventory only if status is DISPENSED
+        /*Update inventory only if status is DISPENSED
         if (prescription.getStatus() == Prescription.PrescriptionStatus.DISPENSED) {
+            MedInvent.updateInventory(prescription.getMedicationName(), prescription.getQuantity());
+        } */
+        updatePrescriptionStatus(prescription, status);
+       if (status == Prescription.PrescriptionStatus.DISPENSED) {
             MedInvent.updateInventory(prescription.getMedicationName(), prescription.getQuantity());
         }
 
-        updatePrescriptionStatus(prescription, status);
+
+        
         System.out.println("Prescription updated successfully:");
         System.out.println(prescription);
 
@@ -148,6 +151,7 @@ public class Pharmacist extends User {
     // Abstract method from User class
     @Override
     public void displayMenu() {
+        System.out.println("Pharmacist Menu:");
         System.out.println("1. View Appointment Outcome");
         System.out.println("2. Update Prescription Status");
         System.out.println("3. View medical inventory");

@@ -1,0 +1,25 @@
+Staff ID,Name,Role,Gender,Age
+D001,John Smith,Doctor,Male,45
+D002,Emily Clarke,Doctor,Female,38
+P001,Mark Lee,Pharmacist,Male,29
+A001,Sarah Lee,Administrator,Female,40
+A101,William Green,Administrator,Male,30
+A111,Tracy Lewis,Administrator,Female,28
+A120,Daniel Cruz,Administrator,Male,54
+A113,Terry Conner,Administrator,Male,29
+A115,Jacob Smith,Administrator,Male,45
+A116,Timothy Williams,Administrator,Male,41
+D107,Brandon Marshall,Doctor,Male,37
+D112,Tiffany Watkins DDS,Doctor,Female,36
+D118,Helen Hubbard,Doctor,Female,45
+D119,Catherine Holland,Doctor,Female,54
+D109,Todd Travis,Doctor,Male,46
+D117,John Tran,Doctor,Male,42
+P102,Maureen Robles,Pharmacist,Female,33
+P104,Theresa Wilson,Pharmacist,Female,39
+P114,Elizabeth Holmes,Pharmacist,Female,27
+P103,Gregory Dennis,Pharmacist,Male,34
+P105,Matthew Graham,Pharmacist,Male,44
+P106,Stephanie White,Pharmacist,Female,40
+P108,Benjamin Hernandez,Pharmacist,Male,49
+P110,Jeff Malone,Pharmacist,Male,50

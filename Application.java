@@ -39,7 +39,7 @@ public class Application {
 
             if (user instanceof Administrator) {
                 Administrator admin = (Administrator) user;
-                handleAdminMenu(patients, admin, choice, scanner, manager, requests);
+                logout = handleAdminMenu(patients, admin, choice, scanner, manager, requests);
             } else if (user instanceof Doctor) {
                 Doctor docUser = (Doctor) user;
                 logout = handleDoctorMenu(docUser, choice, scanner, manager, patients, recordManager); // Capture logout status
@@ -48,7 +48,7 @@ public class Application {
                 logout = handlePatientMenu(patUser, choice, null, scanner, manager, recordManager); // Capture logout status
             } else if (user instanceof Pharmacist) {
                 Pharmacist pharmacist = (Pharmacist) user;
-                handlePharmacistMenu(pharmacist, choice, scanner, patients, manager, requests);
+                logout = handlePharmacistMenu(pharmacist, choice, scanner, patients, manager, requests);
             } else {
                 System.out.println("Invalid role.");
             }
@@ -61,7 +61,7 @@ public class Application {
             AppointmentManager manager, List<ReplenishmentRequest> requests) {
         switch (choice) {
             case 1: // Manage Staff
-                admin.manageStaff(scanner, "Staff_List.csv");
+                admin.manageStaff(scanner, "Staff_List1.csv");
                 break;
 
             case 2: // View Appointments
@@ -69,8 +69,8 @@ public class Application {
                 Patient selectedPatient =CsvManager.find_patient();
 
                 if (selectedPatient != null) {
-                    System.out.println("Completed Appointments for Patient ID: " + selectedPatient.hospitalID);
-                    List<Appointment> completedAppointments = manager.getCompletedAppointments(selectedPatient);
+                    System.out.println("All Appointments for Patient ID: " + selectedPatient.hospitalID);
+                    List<Appointment> completedAppointments = manager.getAppointmentsByPatient(selectedPatient);
 
                     if (completedAppointments.isEmpty()) {
                         System.out.println("No completed appointments found for this patient.");
@@ -109,7 +109,7 @@ public class Application {
             case 1: // View Patient Medical Records
                 // Find patient from the list
                 Patient patient1 = CsvManager.find_patient();
-                doctor.viewPatientRecords(patient1, manager);
+                doctor.viewPatientRecords(patient1, manager, recordManager);
                 break;
 
             case 2: // Update Patient Medical Records
@@ -197,6 +197,7 @@ public class Application {
             AppointmentManager manager, MedicalRecordManager recordManager) {
         switch (choice) {
             case 1: // View Medical Record
+                //recordManager.viewMedicalRecord(patient);
                 patient.viewMedicalRecord(recordManager);
                 break;
 
@@ -262,20 +263,20 @@ public class Application {
         return false; // Continue in Patient menu
     }
 
-    private static void handlePharmacistMenu(Pharmacist pharmacist, int choice, Scanner scanner,
+    private static boolean handlePharmacistMenu(Pharmacist pharmacist, int choice, Scanner scanner,
             List<Patient> patients, AppointmentManager manager, List<ReplenishmentRequest> requests) {
         // System.out.println("Enter Patient ID to view appointment outcomes:");
         // String patientId = scanner.nextLine();
                 
-        // Find patient from the list
-        Patient selectedPatient = CsvManager.find_patient();
-
-        if (selectedPatient == null) {
-            System.out.println("Invalid Patient ID. Please try again.");
-        }
 
         switch (choice) {
             case 1: // View Appointment Outcome
+                // Find patient from the list
+                Patient selectedPatient = CsvManager.find_patient();
+
+                if (selectedPatient == null) {
+                    System.out.println("Invalid Patient ID. Please try again.");
+                }
                 selectedPatient.viewCompletedAppointments(manager);
                 break;
 
@@ -297,12 +298,12 @@ public class Application {
                 break;
 
             case 5:// logout
-                System.out.println("Logging out... Goodbye!");
+                return true;
                 // Optionally, break out of the current loop or end the session
-                break;
 
             default:
                 System.out.println("Invalid option for Pharmacist.");
         }
+        return false;
     }
 }

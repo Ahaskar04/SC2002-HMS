@@ -13,6 +13,7 @@ public class CsvManager {
     private static Scanner  scanner=new Scanner(System.in);
     private static List<Patient> patients = loadPatientData("patient_list.csv"); // Load patients from CSV
     private static List<User> staff = loadStaffData("Staff_List.csv"); // Load staff from CSV
+    private static List<User> staff1 = loadStaffData("Staff_List1.csv"); // Load staff from CSV
 
     // New Method: Load patients from CSV
     public static List<Patient> loadPatientData(String filePath) {

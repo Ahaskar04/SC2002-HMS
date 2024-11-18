@@ -1,4 +1,5 @@
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -109,7 +110,9 @@ public class Appointment {
 
     @Override
     public String toString() {
-        return "Appointment [Date: " + appointmentDate +
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy"); // Adjust format as needed
+        String formattedDate = dateFormat.format(appointmentDate); // appointmentDate is your Date object
+        return "Appointment [Date: " + formattedDate +
                 ", Time: " + appointmentTime +
                 ", Status: " + status +
                 ", Service Type: " + serviceType +

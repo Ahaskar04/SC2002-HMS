@@ -47,13 +47,17 @@ public class Patient extends User {
         return medicalRecords;
     }
 
-    // Method to add a medical record
+    public void setMedicalRecords(List<MedicalRecord> medicalRecords) {
+        this.medicalRecords = medicalRecords;
+    }
+
+    /* Method to add a medical record
     public void addMedicalRecord(String diagnosis, String treatment, String date) {
         MedicalRecord record = new MedicalRecord(diagnosis, treatment, date);
         this.medicalRecords.add(record);
-    }
+    } */
 
-    // To view Medical Records
+    //To view Medical Records
     public void viewMedicalRecord(MedicalRecordManager manager) {
         manager.viewMedicalRecord(this);
     }

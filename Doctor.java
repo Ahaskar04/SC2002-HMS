@@ -37,8 +37,7 @@ public class Doctor extends User {
     }
 
     // Method to view Patient Records
-    public void viewPatientRecords(Patient patient, AppointmentManager manager) {
-        MedicalRecordManager recordManager = new MedicalRecordManager();
+    public void viewPatientRecords(Patient patient, AppointmentManager manager, MedicalRecordManager recordManager) {
         patient.viewMedicalRecord(recordManager);
         System.out.println("Appointment history:");
         patient.aptHistory(patient, manager);
