@@ -44,6 +44,12 @@ public class PasswordHandler implements PasswordService {
                 System.out.print("Enter Password: ");
                 String password = scanner.nextLine();
 
+                // Reject empty passwords
+                if (password.isEmpty()) {
+                    System.out.println("Password cannot be empty. Please try again.");
+                    continue;
+                }
+
                 PasswordUtils utils = new PasswordUtils();
                 String hashedPassword = utils.hashPassword(password);
 
@@ -74,6 +80,13 @@ public class PasswordHandler implements PasswordService {
                     System.out.println("This is your first login. Please change your password.");
                     System.out.print("Enter new password: ");
                     String newPassword = scanner.nextLine();
+
+                    // Reject empty new password
+                    while (newPassword.isEmpty()) {
+                        System.out.println("Password cannot be empty. Please enter a valid password:");
+                        newPassword = scanner.nextLine();
+                    }
+
                     currentUser.setPassword(utils.hashPassword(newPassword));
                     currentUser.setFirstLogin(false);
 
@@ -88,6 +101,7 @@ public class PasswordHandler implements PasswordService {
         }
         return currentUser;
     }
+
     
     protected void updateStaffList(List<User> staff, String filePath, PasswordUtils utils) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {

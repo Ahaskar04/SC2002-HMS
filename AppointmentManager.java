@@ -310,34 +310,63 @@ public class AppointmentManager {
         scanner.nextLine(); // Consume the leftover newline
         boolean isAvailable = availabilityInput == 1;
 
-        try {
-            System.out.print("Enter available date (dd/MM/yyyy): ");
-            Date date = new SimpleDateFormat("dd/MM/yyyy").parse(scanner.nextLine());
+        Date date = null;
+        while (date == null) {
+            try {
+                System.out.print("Enter available date (dd/MM/yyyy): ");
+                String dateString = scanner.nextLine();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                dateFormat.setLenient(false); // Enable strict date parsing
+                date = dateFormat.parse(dateString);
+            } catch (ParseException e) {
+                System.out.println("Invalid date format. Please enter a valid date in the format dd/MM/yyyy.");
+            }
+        }
 
-            System.out.print("Enter available time (HH:mm): ");
-            Time time = Time.valueOf(scanner.nextLine() + ":00");
+        Time time = null;
+        while (time == null) {
+            try {
+                System.out.print("Enter available time (HH:mm): ");
+                String timeString = scanner.nextLine();
 
-            boolean slotExists = false;
-            for (Appointment appointment : doctor.getUpcomingAppointments()) {
-                if (appointment.getAppointmentDate().equals(date) &&
-                    appointment.getAppointmentTime().equals(time)) {
-                    appointment.updateStatus(isAvailable ? Appointment.AppointmentStatus.AVAILABLE : Appointment.AppointmentStatus.UNAVAILABLE);
-                    slotExists = true;
-                    break;
+                // Validate time format manually
+                String[] timeParts = timeString.split(":");
+                if (timeParts.length != 2) throw new IllegalArgumentException();
+
+                int hours = Integer.parseInt(timeParts[0]);
+                int minutes = Integer.parseInt(timeParts[1]);
+
+                if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+                    throw new IllegalArgumentException("Invalid time range.");
                 }
-            }
 
-            if (!slotExists && isAvailable) {
-                Appointment newAppointment = new Appointment(null, doctor, date, time, Appointment.AppointmentStatus.AVAILABLE);
-                doctor.getUpcomingAppointments().add(newAppointment);
-                manager.addAppointment(newAppointment);
-                System.out.println("New appointment slot added.");
-            } 
-            else if (!isAvailable) {
-                System.out.println("Availability removed for the selected slot.");
+                // If valid, create a Time object
+                time = Time.valueOf(timeString + ":00");
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid time format or out-of-range value. Please enter a valid time in the format HH:mm (24-hour format).");
             }
-        } catch (ParseException | IllegalArgumentException e) {
-            System.out.println("Invalid date or time format. Please try again.");
+        }
+
+        boolean slotExists = false;
+        for (Appointment appointment : doctor.getUpcomingAppointments()) {
+            if (appointment.getAppointmentDate().equals(date) &&
+                appointment.getAppointmentTime().equals(time)) {
+                appointment.updateStatus(isAvailable ? Appointment.AppointmentStatus.AVAILABLE : Appointment.AppointmentStatus.UNAVAILABLE);
+                slotExists = true;
+                break;
+            }
+        }
+
+        if (!slotExists && isAvailable) {
+            Appointment newAppointment = new Appointment(null, doctor, date, time, Appointment.AppointmentStatus.AVAILABLE);
+            doctor.getUpcomingAppointments().add(newAppointment);
+            manager.addAppointment(newAppointment);
+            System.out.println("New appointment slot added.");
+        } 
+        else if (!isAvailable) {
+            System.out.println("Availability removed for the selected slot.");
         }
     }
+
+
 }
